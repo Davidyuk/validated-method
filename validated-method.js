@@ -2,8 +2,10 @@
 
 ValidatedMethod = class ValidatedMethod {
   constructor(options) {
-    // Default to no mixins
+    // Default to no mixins, you can pass nested arrays so that people can ship mixin packs
     options.mixins = options.mixins || [];
+    check(options.mixins, [Match.Any]);
+    options.mixins = _.flatten(options.mixins);
     check(options.mixins, [Function]);
     check(options.name, String);
     options = applyMixins(options, options.mixins);
@@ -96,12 +98,10 @@ perhaps you meant to throw an error?`);
 
 // Mixins get a chance to transform the arguments before they are passed to the actual Method
 function applyMixins(args, mixins) {
-  // You can pass nested arrays so that people can ship mixin packs
-  const flatMixins = _.flatten(mixins);
   // Save name of the method here, so we can attach it to potential error messages
   const {name} = args;
 
-  flatMixins.forEach((mixin) => {
+  mixins.forEach((mixin) => {
     args = mixin(args);
 
     if(!Match.test(args, Object)) {
